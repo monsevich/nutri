@@ -1,0 +1,62 @@
+{
+  "гречка с курицей": {
+    "calories_kcal": 165,
+    "proteins_g": 18,
+    "fats_g": 5,
+    "carbs_g": 15
+  },
+  "салат огурцы-помидоры": {
+    "calories_kcal": 45,
+    "proteins_g": 1,
+    "fats_g": 3,
+    "carbs_g": 4
+  },
+  "паста болоньезе": {
+    "calories_kcal": 170,
+    "proteins_g": 8,
+    "fats_g": 6,
+    "carbs_g": 22
+  },
+  "бутерброд с сыром": {
+    "calories_kcal": 280,
+    "proteins_g": 12,
+    "fats_g": 14,
+    "carbs_g": 26
+  },
+  "овсянка с ягодами": {
+    "calories_kcal": 120,
+    "proteins_g": 4,
+    "fats_g": 3,
+    "carbs_g": 20
+  },
+  "борщ": {
+    "calories_kcal": 90,
+    "proteins_g": 5,
+    "fats_g": 4,
+    "carbs_g": 11
+  },
+  "сырники": {
+    "calories_kcal": 220,
+    "proteins_g": 14,
+    "fats_g": 8,
+    "carbs_g": 25
+  },
+  "рыба с овощами": {
+    "calories_kcal": 150,
+    "proteins_g": 20,
+    "fats_g": 6,
+    "carbs_g": 6
+  },
+  "плов": {
+    "calories_kcal": 190,
+    "proteins_g": 8,
+    "fats_g": 9,
+    "carbs_g": 22
+  },
+  "вареники с картошкой": {
+    "calories_kcal": 210,
+    "proteins_g": 6,
+    "fats_g": 7,
+    "carbs_g": 32
+  }
+}
