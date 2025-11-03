@@ -8,7 +8,7 @@ from ..services.core_api_client import CoreApiClient
 router = Router()
 
 
-async def _format_progress(data: dict) -> str:
+def _format_progress(data: dict) -> str:
     lines = ["Последний прогресс:"]
     if data.get("last_weight_kg") is not None:
         lines.append(f"Вес: {data['last_weight_kg']} кг")
