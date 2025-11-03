@@ -1,10 +1,11 @@
-from aiogram import Router
+from aiogram import Dispatcher, Router
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import Message
 
 from ..keyboards.main_menu import main_menu
+from ..services.core_api_client import CoreApiClient
 
 
 router = Router()
@@ -165,8 +166,8 @@ async def process_activity(message: Message, state: FSMContext) -> None:
     await state.update_data(activity=normalized_activity)
 
     data = await state.get_data()
-    bot = message.bot
-    core_api_client = bot.get("core_api_client")
+    dispatcher = Dispatcher.get_current()
+    core_api_client: CoreApiClient = dispatcher["core_api_client"]
     payload = {
         "telegram_id": str(message.from_user.id),
         "age": data["age"],

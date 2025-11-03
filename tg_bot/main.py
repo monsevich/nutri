@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import os
+from typing import Any, Dict
 
 from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
@@ -14,19 +15,23 @@ from .services.vision_api_client import VisionApiClient
 logging.basicConfig(level=logging.INFO)
 
 
-def load_settings() -> dict:
+def load_settings() -> Dict[str, Any]:
     load_dotenv()
-    return {
+    settings = {
         "token": os.getenv("TG_BOT_TOKEN"),
-        "core_api_url": os.getenv("CORE_API_URL", "http://localhost:8000"),
-        "vision_api_url": os.getenv("VISION_API_URL", "http://localhost:8001"),
+        "core_api_url": os.getenv("CORE_API_URL"),
+        "vision_api_url": os.getenv("VISION_API_URL"),
     }
+    missing = [key for key, value in settings.items() if not value]
+    if missing:
+        raise RuntimeError(
+            "Не заданы переменные окружения: " + ", ".join(sorted(missing))
+        )
+    return settings
 
 
 async def main() -> None:
     settings = load_settings()
-    if not settings["token"]:
-        raise RuntimeError("TG_BOT_TOKEN не задан в переменных окружения")
 
     bot = Bot(settings["token"], parse_mode=ParseMode.HTML)
     dp = Dispatcher()
@@ -34,8 +39,8 @@ async def main() -> None:
     core_api_client = CoreApiClient(settings["core_api_url"])
     vision_api_client = VisionApiClient(settings["vision_api_url"])
 
-    bot["core_api_client"] = core_api_client
-    bot["vision_api_client"] = vision_api_client
+    dp["core_api_client"] = core_api_client
+    dp["vision_api_client"] = vision_api_client
 
     dp.include_router(start.router)
     dp.include_router(progress.router)

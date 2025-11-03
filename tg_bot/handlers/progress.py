@@ -1,4 +1,4 @@
-from aiogram import F, Router
+from aiogram import Dispatcher, F, Router
 from aiogram.filters import Command
 from aiogram.types import Message
 
@@ -27,6 +27,7 @@ async def _format_progress(data: dict) -> str:
 @router.message(Command("progress"))
 @router.message(F.text == "Мой прогресс")
 async def show_progress(message: Message) -> None:
-    core_api_client: CoreApiClient = message.bot.get("core_api_client")
+    dispatcher = Dispatcher.get_current()
+    core_api_client: CoreApiClient = dispatcher["core_api_client"]
     data = await core_api_client.get_progress_summary(str(message.from_user.id))
     await message.answer(_format_progress(data))
