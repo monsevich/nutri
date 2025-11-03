@@ -19,6 +19,15 @@ async def show_report(message: Message) -> None:
         await message.answer("Отчёт пока не готов. Собирай данные и возвращайся позже!")
         return
 
-    flags = ", ".join(f"{key}: {value}" for key, value in data.get("status_flags", {}).items())
-    text = f"Отчёт за неделю {data['week_start']} — {data['week_end']}\n\n{data['summary_text']}\n\nСтатус: {flags}"
-    await message.answer(text)
+    lines = [
+        f"Отчёт за неделю {data['week_start']} — {data['week_end']}",
+        "",
+        data.get("summary_text", "Данные за неделю пока пустые."),
+    ]
+
+    status_flags = data.get("status_flags") or {}
+    if status_flags:
+        flags_text = ", ".join(f"{key}: {value}" for key, value in status_flags.items())
+        lines.extend(["", f"Статус: {flags_text}"])
+
+    await message.answer("\n".join(lines))

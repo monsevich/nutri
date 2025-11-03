@@ -1,5 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select
+from datetime import date, timedelta
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -30,7 +30,15 @@ async def get_weekly_report(telegram_id: str, session: AsyncSession = Depends(ge
     )
     report = result.scalars().first()
     if not report:
-        raise HTTPException(status_code=404, detail="Пока нет отчётов")
+        today = date.today()
+        week_start = today - timedelta(days=today.weekday())
+        week_end = week_start + timedelta(days=6)
+        return WeeklyReportResponse(
+            week_start=week_start,
+            week_end=week_end,
+            summary_text="Данные за неделю пока пустые.",
+            status_flags={},
+        )
 
     return WeeklyReportResponse(
         week_start=report.week_start,

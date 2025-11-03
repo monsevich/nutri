@@ -19,8 +19,10 @@ def load_settings() -> Dict[str, Any]:
     load_dotenv()
     settings = {
         "token": os.getenv("TG_BOT_TOKEN"),
-        "core_api_url": os.getenv("CORE_API_URL"),
-        "vision_api_url": os.getenv("VISION_API_URL"),
+        "core_api_base_url": os.getenv("CORE_API_BASE_URL")
+        or os.getenv("CORE_API_URL"),
+        "vision_service_base_url": os.getenv("VISION_SERVICE_BASE_URL")
+        or os.getenv("VISION_API_URL"),
     }
     missing = [key for key, value in settings.items() if not value]
     if missing:
@@ -36,8 +38,8 @@ async def main() -> None:
     bot = Bot(settings["token"], parse_mode=ParseMode.HTML)
     dp = Dispatcher()
 
-    core_api_client = CoreApiClient(settings["core_api_url"])
-    vision_api_client = VisionApiClient(settings["vision_api_url"])
+    core_api_client = CoreApiClient(settings["core_api_base_url"])
+    vision_api_client = VisionApiClient(settings["vision_service_base_url"])
 
     dp["core_api_client"] = core_api_client
     dp["vision_api_client"] = vision_api_client
