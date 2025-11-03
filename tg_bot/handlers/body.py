@@ -1,6 +1,6 @@
 from datetime import date
 
-from aiogram import Dispatcher, F, Router
+from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
@@ -79,7 +79,7 @@ async def process_body_chest(message: Message, state: FSMContext) -> None:
     data = await state.get_data()
     await state.clear()
 
-    dispatcher = Dispatcher.get_current()
+    dispatcher = message.bot.dispatcher
     core_api_client: CoreApiClient = dispatcher["core_api_client"]
     await core_api_client.log_body(
         {

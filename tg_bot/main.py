@@ -42,6 +42,8 @@ async def main() -> None:
     dp["core_api_client"] = core_api_client
     dp["vision_api_client"] = vision_api_client
 
+    bot.dispatcher = dp
+
     dp.include_router(start.router)
     dp.include_router(progress.router)
     dp.include_router(menu.router)

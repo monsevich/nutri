@@ -1,4 +1,4 @@
-from aiogram import Dispatcher, Router
+from aiogram import Router
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
@@ -166,7 +166,7 @@ async def process_activity(message: Message, state: FSMContext) -> None:
     await state.update_data(activity=normalized_activity)
 
     data = await state.get_data()
-    dispatcher = Dispatcher.get_current()
+    dispatcher = message.bot.dispatcher
     core_api_client: CoreApiClient = dispatcher["core_api_client"]
     payload = {
         "telegram_id": str(message.from_user.id),
