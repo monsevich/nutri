@@ -1,3 +1,4 @@
+import httpx
 from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.types import Message
@@ -15,7 +16,13 @@ async def show_report(message: Message) -> None:
     core_api_client: CoreApiClient = dispatcher["core_api_client"]
     try:
         data = await core_api_client.get_weekly_report(str(message.from_user.id))
-    except Exception:
+    except httpx.HTTPStatusError as exc:
+        if exc.response.status_code == 404:
+            await message.answer("Отчёт пока пустой.")
+            return
+        await message.answer("Отчёт пока не готов. Собирай данные и возвращайся позже!")
+        return
+    except httpx.HTTPError:
         await message.answer("Отчёт пока не готов. Собирай данные и возвращайся позже!")
         return
 

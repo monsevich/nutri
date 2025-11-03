@@ -20,9 +20,27 @@ async def _get_user(session: AsyncSession, telegram_id: str) -> models.User:
     return user
 
 
+def _empty_report_response() -> WeeklyReportResponse:
+    today = date.today()
+    week_start = today - timedelta(days=today.weekday())
+    week_end = week_start + timedelta(days=6)
+    return WeeklyReportResponse(
+        week_start=week_start,
+        week_end=week_end,
+        summary_text="Данные за неделю пока пустые.",
+        status_flags={},
+    )
+
+
 @router.get("/weekly", response_model=WeeklyReportResponse)
 async def get_weekly_report(telegram_id: str, session: AsyncSession = Depends(get_session)) -> WeeklyReportResponse:
-    user = await _get_user(session, telegram_id)
+    try:
+        user = await _get_user(session, telegram_id)
+    except HTTPException as exc:
+        if exc.status_code == 404:
+            return _empty_report_response()
+        raise
+
     result = await session.execute(
         select(models.WeeklyReport)
         .where(models.WeeklyReport.user_id == user.id)
@@ -30,15 +48,7 @@ async def get_weekly_report(telegram_id: str, session: AsyncSession = Depends(ge
     )
     report = result.scalars().first()
     if not report:
-        today = date.today()
-        week_start = today - timedelta(days=today.weekday())
-        week_end = week_start + timedelta(days=6)
-        return WeeklyReportResponse(
-            week_start=week_start,
-            week_end=week_end,
-            summary_text="Данные за неделю пока пустые.",
-            status_flags={},
-        )
+        return _empty_report_response()
 
     return WeeklyReportResponse(
         week_start=report.week_start,
