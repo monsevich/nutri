@@ -68,20 +68,21 @@ def _format_number(value: float) -> str:
 @router.message(F.photo)
 async def handle_meal_photo(message: Message) -> None:
     update_id = getattr(message, "update_id", None)
+    telegram_id = str(message.from_user.id) if message.from_user else "unknown"
     logger.debug(
         "Handling meal photo update_id=%s message_id=%s user_id=%s",
         update_id,
         message.message_id,
-        message.from_user.id if message.from_user else "unknown",
+        telegram_id,
     )
 
     status_message = await message.answer("Приняла фото, анализирую…")
     bot = message.bot
     photo = message.photo[-1]
+    image_buffer = BytesIO()
     try:
         file = await bot.get_file(photo.file_id)
-        buffer = BytesIO()
-        await bot.download_file(file.file_path, destination=buffer)
+        await bot.download_file(file.file_path, destination=image_buffer)
     except Exception:
         logger.exception(
             "Failed to download photo update_id=%s file_id=%s",
@@ -92,7 +93,15 @@ async def handle_meal_photo(message: Message) -> None:
             "Не получилось распознать блюдо, введите калории вручную."
         )
         return
-    buffer.seek(0)
+    image_buffer.seek(0)
+    image_bytes = image_buffer.getvalue()
+    logger.debug(
+        "Downloaded photo for user_id=%s update_id=%s file_id=%s size=%sB",
+        telegram_id,
+        update_id,
+        photo.file_id,
+        len(image_bytes),
+    )
 
     dispatcher = bot.dispatcher
     vision_client: VisionApiClient = dispatcher["vision_api_client"]
@@ -105,7 +114,7 @@ async def handle_meal_photo(message: Message) -> None:
             photo.file_id,
         )
         result = await vision_client.estimate_meal(
-            buffer.getvalue(), filename=f"{photo.file_unique_id}.jpg"
+            image_bytes, filename=f"{photo.file_unique_id}.jpg"
         )
     except httpx.HTTPError:
         logger.exception(
@@ -118,33 +127,40 @@ async def handle_meal_photo(message: Message) -> None:
         )
         return
 
+    label = result.get("label") or _format_label_from_candidates(result)
     calories_raw = result.get("calories_kcal")
     try:
-        calories = float(calories_raw)
+        calories_number = float(calories_raw)
     except (TypeError, ValueError):
-        calories = None
+        calories_number = None
 
-    label = result.get("label") or _format_label_from_candidates(result)
-    if calories is None:
-        logger.debug(
-            "Vision response without calories update_id=%s result=%s",
-            update_id,
-            result,
-        )
+    logger.debug(
+        "Vision response for user_id=%s: label=%s calories=%s raw=%s",
+        telegram_id,
+        label,
+        calories_raw,
+        result,
+    )
+
+    if calories_number is None:
         await status_message.edit_text(
             "Не получилось распознать блюдо, введите калории вручную."
         )
         return
 
-    calories_number = float(calories)
     calories_text = _format_number(calories_number)
     label_text = label or "блюдо"
 
     payload = {
-        "telegram_id": str(message.from_user.id),
+        "telegram_id": telegram_id,
         "date": date.today().isoformat(),
         "calories_in": calories_number,
     }
+    logger.debug(
+        "Sending daily intake to core_api for user_id=%s payload=%s",
+        telegram_id,
+        payload,
+    )
     try:
         await core_api_client.log_daily_intake(payload)
     except httpx.HTTPError:
@@ -162,10 +178,7 @@ async def handle_meal_photo(message: Message) -> None:
         return
 
     await status_message.edit_text(
-        (
-            f"Приняла фото: {label_text}. Оценила в {calories_text} ккал "
-            "и записала в дневник ✅"
-        )
+        f"Записала: {calories_text} ккал из блюда «{label_text}»"
     )
 
 
