@@ -1,4 +1,4 @@
-from aiogram import Dispatcher, F, Router
+from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.types import Message
 
@@ -11,7 +11,7 @@ router = Router()
 @router.message(Command("report"))
 @router.message(F.text == "Недельный отчёт")
 async def show_report(message: Message) -> None:
-    dispatcher = Dispatcher.get_current()
+    dispatcher = message.bot.dispatcher
     core_api_client: CoreApiClient = dispatcher["core_api_client"]
     try:
         data = await core_api_client.get_weekly_report(str(message.from_user.id))
