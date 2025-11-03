@@ -1,4 +1,4 @@
-from aiogram import F, Router
+from aiogram import Dispatcher, F, Router
 from aiogram.filters import Command
 from aiogram.types import Message
 
@@ -20,6 +20,7 @@ def _format_menu(menu: dict) -> str:
 @router.message(Command("menu"))
 @router.message(F.text == "Меню на неделю")
 async def show_menu(message: Message) -> None:
-    core_api_client: CoreApiClient = message.bot.get("core_api_client")
+    dispatcher = Dispatcher.get_current()
+    core_api_client: CoreApiClient = dispatcher["core_api_client"]
     data = await core_api_client.get_week_menu(str(message.from_user.id))
     await message.answer(_format_menu(data["menu"]))

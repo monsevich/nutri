@@ -1,7 +1,7 @@
 from datetime import date
 from io import BytesIO
 
-from aiogram import F, Router
+from aiogram import Dispatcher, F, Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
@@ -33,7 +33,8 @@ async def process_manual_calories(message: Message, state: FSMContext) -> None:
         await message.answer("Нужно число, попробуй ещё раз.")
         return
 
-    core_api_client: CoreApiClient = message.bot.get("core_api_client")
+    dispatcher = Dispatcher.get_current()
+    core_api_client: CoreApiClient = dispatcher["core_api_client"]
     await core_api_client.log_daily_intake(
         {
             "telegram_id": str(message.from_user.id),
@@ -52,8 +53,9 @@ async def handle_meal_photo(message: Message) -> None:
     await message.bot.download(photo, destination=buffer)
     buffer.seek(0)
 
-    vision_client: VisionApiClient = message.bot.get("vision_api_client")
-    core_api_client: CoreApiClient = message.bot.get("core_api_client")
+    dispatcher = Dispatcher.get_current()
+    vision_client: VisionApiClient = dispatcher["vision_api_client"]
+    core_api_client: CoreApiClient = dispatcher["core_api_client"]
 
     try:
         result = await vision_client.estimate_meal(buffer.getvalue(), filename=f"{photo.file_unique_id}.jpg")
