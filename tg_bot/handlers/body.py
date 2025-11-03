@@ -9,6 +9,16 @@ from aiogram.types import Message
 from ..services.core_api_client import CoreApiClient
 
 
+_MAIN_MENU_BUTTONS = {
+    "Мой прогресс",
+    "Меню на неделю",
+    "Записать замеры",
+    "Добавить калории",
+    "Недельный отчёт",
+    "Фото приёма пищи",
+}
+
+
 router = Router()
 
 
@@ -35,8 +45,12 @@ async def start_body_log(message: Message, state: FSMContext) -> None:
 
 @router.message(BodyState.weight)
 async def process_body_weight(message: Message, state: FSMContext) -> None:
+    text = (message.text or "").strip()
+    if text in _MAIN_MENU_BUTTONS:
+        return
+
     try:
-        weight = float(message.text.replace(",", "."))
+        weight = float(text.replace(",", "."))
     except (AttributeError, ValueError):
         await message.answer("Нужно число. Попробуй ещё раз.")
         return
