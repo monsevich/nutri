@@ -1,4 +1,4 @@
-
+[
   {"name":"салат огурцы-помидоры","keywords":["salad","cucumber","tomato","vegetable"],"calories":120},
   {"name":"гречка с курицей","keywords":["buckwheat","chicken","гречка","птица"],"calories":450},
   {"name":"паста болоньезе","keywords":["pasta","spaghetti","bolognese","meat"],"calories":680},
@@ -46,7 +46,8 @@
   {"name":"салат греческий","keywords":["greek","salad","feta","olive"],"calories":260},
   {"name":"чизкейк","keywords":["cheesecake","dessert","cake"],"calories":420},
   {"name":"мороженое","keywords":["icecream","dessert","gelato"],"calories":210},
-  {"name":"шоколадный торт","keywords":["chocolate","cake","dessert"],"calories":520}
-  {"name": "паста карбонара", "keywords": ["pasta","bacon","cheese"], "calories": 550},
-  {"name": "суп минестроне", "keywords": ["soup","vegetable","pasta"], "calories": 200},
-  {"name": "суши с лососем", "keywords": ["sushi","salmon","rice"], "calories": 300}
+  {"name":"шоколадный торт","keywords":["chocolate","cake","dessert"],"calories":520},
+  {"name":"паста карбонара", "keywords": ["pasta","bacon","cheese"], "calories": 550},
+  {"name":"суп минестроне", "keywords": ["soup","vegetable","pasta"], "calories": 200},
+  {"name":"суши с лососем", "keywords": ["sushi","salmon","rice"], "calories": 300}
+]
