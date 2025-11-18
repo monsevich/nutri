@@ -29,7 +29,7 @@ from torchvision import models
 from torchvision.models import EfficientNet_B0_Weights
 
 BASE_DIR = os.path.dirname(__file__)
-LABELS_FILE = os.path.join(BASE_DIR, "labels.json")
+LABELS_FILE = os.path.join(BASE_DIR, "nutrition_db.json")
 MODEL_CACHE_DIR = os.path.expanduser("~/.cache/vision_service")
 MODEL_FILE = os.path.join(MODEL_CACHE_DIR, "efficientnet_b0_rwightman-7f5810bc.pth")
 MODEL_URL = "https://download.pytorch.org/models/efficientnet_b0_rwightman-7f5810bc.pth"
