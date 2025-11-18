@@ -1,5 +1,18 @@
 """Torch-based inference utilities for meal classification."""
 
+import os
+import json
+import hashlib
+from typing import Tuple, List
+from functools import lru_cache
+
+import torch
+from torchvision import transforms, models
+from PIL import Image
+from io import BytesIO
+
+
+
 from __future__ import annotations
 
 import io
@@ -15,135 +28,73 @@ from torch import nn
 from torchvision import models
 from torchvision.models import EfficientNet_B0_Weights
 
-logger = logging.getLogger(__name__)
+BASE_DIR = os.path.dirname(__file__)
+LABELS_FILE = os.path.join(BASE_DIR, "labels.json")
+MODEL_CACHE_DIR = os.path.expanduser("~/.cache/vision_service")
+MODEL_FILE = os.path.join(MODEL_CACHE_DIR, "efficientnet_b0_rwightman-7f5810bc.pth")
+MODEL_URL = "https://download.pytorch.org/models/efficientnet_b0_rwightman-7f5810bc.pth"
+MODEL_HASH = "7f5810bc"
 
-_DEFAULT_LABEL = "гречка с курицей"
+os.makedirs(MODEL_CACHE_DIR, exist_ok=True)
 
-_LABEL_KEYWORDS: Dict[str, Iterable[str]] = {
-    "салат огурцы-помидоры": ("salad", "lettuce", "cucumber", "tomato"),
-    "гречка с курицей": ("chicken", "rice", "pilaf", "meat"),
-    "паста болоньезе": ("pasta", "spaghetti", "noodle"),
-    "бутерброд с сыром": ("sandwich", "cheeseburger", "cheese"),
-    "овсянка с ягодами": ("oatmeal", "porridge", "berry"),
-    "борщ": ("borsch", "soup", "broth"),
-    "сырники": ("pancake", "fritter", "cheesecake"),
-    "рыба с овощами": ("salmon", "fish", "vegetable"),
-    "плов": ("pilaf", "paella", "rice"),
-    "вареники с картошкой": ("dumpling", "pierogi", "gyoza"),
-}
+def _sha256(path: str) -> str:
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(8192), b""):
+            h.update(chunk)
+    return h.hexdigest()
 
-
-_TORCH_CACHE_DIR = Path("/root/.cache/torch/hub/checkpoints")
-
-
-def _remove_cached_weights(weights: EfficientNet_B0_Weights) -> Path | None:
-    """Delete a cached weights file if it exists."""
-
-    try:
-        weight_url = weights.url
-        filename = Path(urlparse(weight_url).path).name if weight_url else ""
-    except Exception:  # pragma: no cover - defensive guard
-        logger.exception("Failed to resolve EfficientNet weight cache filename.")
-        return None
-
-    if not filename:
-        return None
-
-    cached_path = _TORCH_CACHE_DIR / filename
-    if cached_path.exists():
+def _verify_or_download_weights():
+    from torch.hub import download_url_to_file
+    if os.path.exists(MODEL_FILE):
+        digest = _sha256(MODEL_FILE)
+        if MODEL_HASH in digest:
+            return
+        # corrupted -> remove
         try:
-            cached_path.unlink()
-            logger.info("Removed cached EfficientNet weights: %s", cached_path)
-            return cached_path
+            os.remove(MODEL_FILE)
         except OSError:
-            logger.exception(
-                "Could not remove cached EfficientNet weights: %s", cached_path
-            )
-    return None
-
-
-def _build_model(weights: EfficientNet_B0_Weights, *, check_hash: bool) -> nn.Module:
-    state_dict = weights.get_state_dict(progress=True, check_hash=check_hash)
-    model = models.efficientnet_b0(weights=None)
-    model.load_state_dict(state_dict)
-    return model
-
-
-def _load_model() -> Tuple[nn.Module, nn.Module, Tuple[str, ...]]:
-    weights = EfficientNet_B0_Weights.DEFAULT
-    transforms = weights.transforms()
-    categories = tuple(weights.meta["categories"])
-
-    try:
-        model = _build_model(weights, check_hash=True)
-    except Exception as exc:
-        logger.warning("Failed to load EfficientNet weights: %s", exc)
-        _remove_cached_weights(weights)
-        try:
-            model = _build_model(weights, check_hash=True)
-        except Exception as retry_exc:
-            logger.error(
-                "Retrying EfficientNet weight download failed: %s", retry_exc
-            )
-            try:
-                model = _build_model(weights, check_hash=False)
-                logger.warning(
-                    "Loaded EfficientNet weights without hash verification."
-                )
-            except Exception as final_exc:
-                logger.exception(
-                    "Failed to load EfficientNet weights even without hash check."
-                )
-                model = models.efficientnet_b0(weights=None)
-                logger.warning(
-                    "Using randomly initialised EfficientNet weights as a fallback; "
-                    "inference results may be unreliable."
-                )
-
-    model.eval()
-    return model, transforms, categories
-
+            pass
+    # download to temp and rename atomically
+    tmp = MODEL_FILE + ".tmp"
+    download_url_to_file(MODEL_URL, tmp, hash_prefix=MODEL_HASH)
+    os.replace(tmp, MODEL_FILE)
 
 @lru_cache(maxsize=1)
-def _get_inference_objects() -> Tuple[nn.Module, nn.Module, Tuple[str, ...]]:
-    model, transforms, categories = _load_model()
-    model.to(torch.device("cpu"))
-    return model, transforms, categories
+def _load_model():
+    # load labels
+    with open(LABELS_FILE, "r", encoding="utf-8") as f:
+        label_map = json.load(f)  # expect list of dict { "name": "...", "keywords": [...], "calories": 400 }
+    _verify_or_download_weights()
+    # load model once
+    model = models.efficientnet_b0(weights=None)
+    state = torch.load(MODEL_FILE, map_location="cpu")
+    model.load_state_dict(state)
+    model.eval()
+    # transforms
+    tr = transforms.Compose([
+        transforms.Resize(256),
+        transforms.CenterCrop(224),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485,0.456,0.406], std=[0.229,0.224,0.225]),
+    ])
+    return model, tr, label_map
 
-
-def _match_label(category_name: str) -> str | None:
-    name = category_name.lower()
-    for label, keywords in _LABEL_KEYWORDS.items():
-        if any(keyword in name for keyword in keywords):
-            return label
-    return None
-
-
-def classify(image_bytes: bytes) -> Tuple[str, float]:
-    """Classify the meal on the image using a pretrained EfficientNet model."""
-
-    try:
-        image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-    except Exception:
-        return _DEFAULT_LABEL, 0.0
-
-    model, transforms, categories = _get_inference_objects()
-    input_tensor = transforms(image).unsqueeze(0)
-
+def classify(image_bytes: bytes, topk: int = 3) -> List[dict]:
+    model, tr, label_map = _load_model()
+    img = Image.open(BytesIO(image_bytes)).convert("RGB")
+    x = tr(img).unsqueeze(0)  # (1, C, H, W)
     with torch.no_grad():
-        logits = model(input_tensor)
-        probabilities = torch.softmax(logits[0], dim=0)
-
-    top_probs, top_indices = torch.topk(probabilities, k=5)
-
-    best_label = _DEFAULT_LABEL
-    best_prob = top_probs[0].item()
-
-    for score, index in zip(top_probs.tolist(), top_indices.tolist()):
-        label_candidate = _match_label(categories[index])
-        if label_candidate:
-            best_label = label_candidate
-            best_prob = score
-            break
-
-    return best_label, float(best_prob)
+        logits = model(x)
+        probs = torch.nn.functional.softmax(logits, dim=-1)[0]
+        top = torch.topk(probs, k=min(topk, probs.shape[0]))
+    results = []
+    # if label_map is a mapping from index->meta, adapt accordingly
+    for score, idx in zip(top.values.tolist(), top.indices.tolist()):
+        meta = label_map[idx] if isinstance(label_map, list) and idx < len(label_map) else {"name": str(idx)}
+        results.append({
+            "name": meta.get("name"),
+            "confidence": float(score),
+            "calories": meta.get("calories")
+        })
+    return results
