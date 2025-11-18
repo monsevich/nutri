@@ -3,7 +3,6 @@
 import os
 import json
 import hashlib
-from typing import Tuple, List
 from functools import lru_cache
 
 import torch
@@ -11,21 +10,9 @@ from torchvision import transforms, models
 from PIL import Image
 from io import BytesIO
 
-
-
-from __future__ import annotations
-
-import io
-import logging
-from functools import lru_cache
 from pathlib import Path
-from typing import Dict, Iterable, Tuple
-from urllib.parse import urlparse
+from typing import Dict, Iterable, Tuple, List
 
-import torch
-from PIL import Image
-from torch import nn
-from torchvision import models
 from torchvision.models import EfficientNet_B0_Weights
 
 BASE_DIR = os.path.dirname(__file__)
@@ -64,7 +51,10 @@ def _verify_or_download_weights():
 def _load_model():
     # load labels
     with open(LABELS_FILE, "r", encoding="utf-8") as f:
-        label_map = json.load(f)  # expect list of dict { "name": "...", "keywords": [...], "calories": 400 }
+    label_map = json.load(f)
+    if not isinstance(label_map, list):
+        raise ValueError("nutrition_db.json должен быть списком блюд")
+
     _verify_or_download_weights()
     # load model once
     model = models.efficientnet_b0(weights=None)
