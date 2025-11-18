@@ -1,62 +1,49 @@
-{
-  "гречка с курицей": {
-    "calories_kcal": 165,
-    "proteins_g": 18,
-    "fats_g": 5,
-    "carbs_g": 15
-  },
-  "салат огурцы-помидоры": {
-    "calories_kcal": 45,
-    "proteins_g": 1,
-    "fats_g": 3,
-    "carbs_g": 4
-  },
-  "паста болоньезе": {
-    "calories_kcal": 170,
-    "proteins_g": 8,
-    "fats_g": 6,
-    "carbs_g": 22
-  },
-  "бутерброд с сыром": {
-    "calories_kcal": 280,
-    "proteins_g": 12,
-    "fats_g": 14,
-    "carbs_g": 26
-  },
-  "овсянка с ягодами": {
-    "calories_kcal": 120,
-    "proteins_g": 4,
-    "fats_g": 3,
-    "carbs_g": 20
-  },
-  "борщ": {
-    "calories_kcal": 90,
-    "proteins_g": 5,
-    "fats_g": 4,
-    "carbs_g": 11
-  },
-  "сырники": {
-    "calories_kcal": 220,
-    "proteins_g": 14,
-    "fats_g": 8,
-    "carbs_g": 25
-  },
-  "рыба с овощами": {
-    "calories_kcal": 150,
-    "proteins_g": 20,
-    "fats_g": 6,
-    "carbs_g": 6
-  },
-  "плов": {
-    "calories_kcal": 190,
-    "proteins_g": 8,
-    "fats_g": 9,
-    "carbs_g": 22
-  },
-  "вареники с картошкой": {
-    "calories_kcal": 210,
-    "proteins_g": 6,
-    "fats_g": 7,
-    "carbs_g": 32
-  }
-}
+
+  {"name":"салат огурцы-помидоры","keywords":["salad","cucumber","tomato","vegetable"],"calories":120},
+  {"name":"гречка с курицей","keywords":["buckwheat","chicken","гречка","птица"],"calories":450},
+  {"name":"паста болоньезе","keywords":["pasta","spaghetti","bolognese","meat"],"calories":680},
+  {"name":"бутерброд с сыром","keywords":["sandwich","cheese","toast","cheeseburger"],"calories":320},
+  {"name":"овсянка с ягодами","keywords":["oatmeal","porridge","berries"],"calories":280},
+  {"name":"борщ","keywords":["borsch","soup","beetroot"],"calories":230},
+  {"name":"сырники","keywords":["syrniki","pancake","cheese","fritter"],"calories":360},
+  {"name":"рыба с овощами","keywords":["fish","salmon","vegetable","grill"],"calories":420},
+  {"name":"плов","keywords":["pilaf","rice","plov","meat"],"calories":600},
+  {"name":"вареники с картошкой","keywords":["dumpling","pierogi","potato","vareniki"],"calories":480},
+  {"name":"куриный суп","keywords":["chicken","soup","broth"],"calories":190},
+  {"name":"суши","keywords":["sushi","roll","rice","fish"],"calories":300},
+  {"name":"лапша вок","keywords":["noodle","wok","stirfry","noodles"],"calories":550},
+  {"name":"каша рисовая","keywords":["rice","porridge","milk"],"calories":240},
+  {"name":"омлет","keywords":["omelette","egg","scrambled"],"calories":250},
+  {"name":"блинчики","keywords":["pancake","blini","crepes"],"calories":330},
+  {"name":"шашлык","keywords":["kebab","shashlik","grill","meat"],"calories":520},
+  {"name":"котлета с пюре","keywords":["cutlet","mashed","potato","meat"],"calories":650},
+  {"name":"гриль-овощи","keywords":["grilled","vegetable","veggies"],"calories":150},
+  {"name":"салат цезарь","keywords":["caesar","salad","chicken","parmesan"],"calories":380},
+  {"name":"фалафель","keywords":["falafel","chickpea","wrap"],"calories":420},
+  {"name":"шаурма","keywords":["shawarma","kebab","wrap","gyro"],"calories":700},
+  {"name":"рузом с овощами","keywords":["roast","beef","vegetable"],"calories":560},
+  {"name":"салат Оливье","keywords":["olivier","salad","potato","mayonnaise"],"calories":360},
+  {"name":"суп минестроне","keywords":["minestrone","soup","vegetable"],"calories":210},
+  {"name":"ризотто","keywords":["risotto","rice","mushroom"],"calories":520},
+  {"name":"пицца маргарита","keywords":["pizza","margarita","cheese","tomato"],"calories":780},
+  {"name":"пицца пепперони","keywords":["pizza","pepperoni","meat","cheese"],"calories":880},
+  {"name":"тако","keywords":["taco","mexican","tortilla"],"calories":420},
+  {"name":"энчилада","keywords":["enchilada","mexican","tortilla","cheese"],"calories":650},
+  {"name":"кебаб","keywords":["kebab","skewer","meat"],"calories":540},
+  {"name":"мусака","keywords":["moussaka","eggplant","meat","bake"],"calories":610},
+  {"name":"гуляш","keywords":["goulash","stew","meat"],"calories":490},
+  {"name":"салат с тунцом","keywords":["tuna","salad","fish"],"calories":300},
+  {"name":"картофель фри","keywords":["fries","potato","fastfood"],"calories":360},
+  {"name":"бургер говяжий","keywords":["burger","beef","cheeseburger"],"calories":930},
+  {"name":"лапша рамэн","keywords":["ramen","noodle","soup"],"calories":520},
+  {"name":"салат с киноа","keywords":["quinoa","salad","healthy"],"calories":290},
+  {"name":"такос с рыбой","keywords":["fish","taco","seafood"],"calories":380},
+  {"name":"медальоны из индейки","keywords":["turkey","medallion","meat"],"calories":410},
+  {"name":"соте из грибов","keywords":["mushroom","sauté","vegetable"],"calories":230},
+  {"name":"тыквенный суп","keywords":["pumpkin","soup","creamy"],"calories":200},
+  {"name":"пельмени","keywords":["dumplings","pelmeni","meat"],"calories":520},
+  {"name":"тушёные овощи","keywords":["stewed","vegetable","ratatouille"],"calories":180},
+  {"name":"салат греческий","keywords":["greek","salad","feta","olive"],"calories":260},
+  {"name":"чизкейк","keywords":["cheesecake","dessert","cake"],"calories":420},
+  {"name":"мороженое","keywords":["icecream","dessert","gelato"],"calories":210},
+  {"name":"шоколадный торт","keywords":["chocolate","cake","dessert"],"calories":520}
